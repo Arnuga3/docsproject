@@ -18,7 +18,7 @@ fastmcp run mcp_chroma.py --transport sse --port 8001
 
 4. Set the URL target box to http://localhost:8001/sse and click Connect.
 
-5. Once connected, navigate to the Tools tab to run mock vector database queries and evaluate similarity score outputs directly in the dashboard interface. List tools, select `serch`.
+5. Once connected, navigate to the Tools tab to run mock vector database queries and evaluate similarity score outputs directly in the dashboard interface. List tools, select `search`.
 
 
 ## Set as Cline MCP server
