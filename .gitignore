@@ -1,4 +1,5 @@
 .env
+.venv/
 docproject/
 chroma_db/
 __pycache__/

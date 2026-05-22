@@ -11,14 +11,13 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Set up local cache directories cleanly
-PROJECT_ROOT = os.getenv("PROJECT_ROOT", r"C:\Users\arnis.zelcs\CODE\docsproject")
-os.environ["HF_HOME"] = os.path.join(PROJECT_ROOT, "cache", "hf")
+PROJECT_ROOT = os.getenv("PROJECT_ROOT", r"C:\Users\arnis.zelcs\CODE\ECDIS-1.3.0\Tools\ai\chroma_search_mcp")
 os.environ["XDG_CACHE_HOME"] = os.path.join(PROJECT_ROOT, "cache")
 
 # ONLY import light core MCP definitions at the top level
 from mcp.server.fastmcp import FastMCP
 
-mcp = FastMCP("Knowledge Base")
+mcp = FastMCP("Chroma Search Tool", port=8001)
 
 # Keep global states empty at launch
 GLOBAL_INDEX = None
@@ -35,18 +34,17 @@ def get_kv_index():
     print("Initializing embedding models and database components lazily...", file=sys.stderr)
     import chromadb
     from llama_index.core import Settings, VectorStoreIndex
-    from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+    from llama_index.embeddings.ollama import OllamaEmbedding
     from llama_index.vector_stores.chroma import ChromaVectorStore
 
-    CHROMA_DB_PATH = os.getenv("CHROMA_DB_PATH", r"C:\Users\arnis.zelcs\CODE\docsproject\chroma_db")
+    CHROMA_DB_PATH = os.getenv("CHROMA_DB_PATH", r"C:\Users\arnis.zelcs\CODE\ECDIS-1.3.0\Tools\ai\chroma_search_mcp\chroma_db")
 
     Settings.llm = None
 
-    Settings.embed_model = HuggingFaceEmbedding(
-        model_name="nomic-ai/nomic-embed-text-v1.5",
-        query_instruction="search_query: ",
-        text_instruction="search_document: ",
-        trust_remote_code=True,
+    # Matches the exact physical baseline embedding profile used in ingestion
+    Settings.embed_model = OllamaEmbedding(
+        model_name="mxbai-embed-large",
+        embed_batch_size=1  # Sequential fallback for absolute server processing stability
     )
 
     DB_CLIENT = chromadb.PersistentClient(
@@ -67,10 +65,10 @@ def search(query: str) -> str:
         # DB and Embedding logic only triggers here
         index = get_kv_index()
         
-        formatted_query = query if query.startswith("search_query:") else f"search_query: {query}"
-
-        retriever = index.as_retriever(similarity_top_k=3)
-        retrieved_nodes = retriever.retrieve(formatted_query)
+        # DRAWBACK FIX Optimization: Since switched to granular 384 chunks, 
+        # raising similarity_top_k to 5 provides a wider context window for LLM.
+        retriever = index.as_retriever(similarity_top_k=5)
+        retrieved_nodes = retriever.retrieve(query)
 
         if not retrieved_nodes:
             return f"No relevant documentation found for: '{query}'"
@@ -97,4 +95,4 @@ def search(query: str) -> str:
 
 
 if __name__ == "__main__":
-    mcp.run()
+    mcp.run(transport="sse")
