@@ -1,31 +1,33 @@
-## Ensure virtual environment is active before running
-pip install \
-  fastmcp \
-  chromadb \
-  python-dotenv \
-  pymupdf4llm \
-  sentence-transformers \
-  llama-index-core \
-  llama-index-readers-file \
-  llama-index-vector-stores-chroma \
-  llama-index-embeddings-huggingface \
-  llama-index-embeddings-deepseek
+## Testing and Debugging with MCP Tools
+
+The Model Context Protocol (MCP) ecosystem provides powerful developer utilities to test your vector database search tool locally before deploying it to an AI client.
+
+### Interactive Browser Testing 
+To launch a local, network-isolated server instance that bypasses standard Windows process management and standard input/output bottlenecks, utilize the Server-Sent Events (SSE) transport protocol on a dedicated port:
+
+1. Launch the Inspector UI via the `fastmcp` CLI:
+```bash
+fastmcp dev inspector mcp_chroma.py
+```
+
+2. Start the server via the `fastmcp` CLI:
+```bash
+fastmcp run mcp_chroma.py --transport sse --port 8001
+```
+3. Change the Transport Type dropdown from stdio to SSE.
+
+4. Set the URL target box to http://localhost:8001/sse and click Connect.
+
+5. Once connected, navigate to the Tools tab to run mock vector database queries and evaluate similarity score outputs directly in the dashboard interface. List tools, select `serch`.
+
 
 ## Set as Cline MCP server
 
 ```
 {
   "mcpServers": {
-    "s100-knowledge-base": {
-      "command": "C:\\Users\\name\\project\\Scripts\\python.exe",
-      "args": [
-        "C:\\Users\\username\\project\\mcp_chroma.py"
-      ],
-      "env": {
-        "PYTHONUNBUFFERED": "1",
-        "API_KEY": "api_key",
-        "CHROMA_DB_PATH": ""
-      }
+    "knowledge-base": {
+      "url": "http://localhost:8001/sse"
     }
   }
 }

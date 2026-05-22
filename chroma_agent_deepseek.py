@@ -9,12 +9,14 @@ from llama_index.core.chat_engine import ContextChatEngine
 
 load_dotenv()
 
+# Make sure your .env file has your official DeepSeek API Key assigned to API_KEY
 LLM_KEY = os.getenv("API_KEY")
+
 Settings.llm = OpenAILike(
-    model="openrouter/free",
+    model="deepseek-chat",              # Official DeepSeek model identifier
     api_key=LLM_KEY,
-    api_base="https://openrouter.ai/api/v1",
-    temperature=0.0,    # Temperature 0.0 eliminates creative guessing
+    api_base="https://api.deepseek.com",
+    temperature=0.0,                    # Temperature 0.0 eliminates creative guessing
     is_chat_model=True
 )
 
@@ -56,7 +58,7 @@ def launch_chroma_agent():
         system_prompt=system_template
     )
 
-    print("\n Strict Context Engine Connected to ChromaDB successfully!")
+    print("\n Strict Context Engine Connected to ChromaDB successfully (via Native DeepSeek API)!")
     print("-" * 50)
     
     while True:

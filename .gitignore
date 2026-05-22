@@ -3,3 +3,5 @@ docproject/
 chroma_db/
 __pycache__/
 docs/
+docs_archive/
+cache/
